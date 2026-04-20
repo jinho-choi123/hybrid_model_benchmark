@@ -1,27 +1,28 @@
-FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
+FROM nvcr.io/nvidia/cuda:12.6.3-devel-rockylinux9
 
-ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV UV_LINK_MODE=copy
 ENV PATH=/root/.local/bin:${PATH}
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN dnf -y update && dnf -y install \
     bash \
     ca-certificates \
-    curl \
+    curl-minimal \
     git \
     zip \
     tmux \
     python3 \
     python3-pip \
-    python3-venv \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    @"Development Tools" \
+    unzip \
+    && dnf clean all
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-RUN git config --global --add safe.directory /workspace/.git
+RUN curl -fsSL https://bun.com/install | bash
+
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 WORKDIR /workspace
 

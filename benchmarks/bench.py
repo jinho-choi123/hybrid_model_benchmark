@@ -33,9 +33,9 @@ def _setup_benchmark(config: BenchmarkConfig) -> tuple[List[str], LLM, SamplingP
         # Since vllm's graph capture removes all the cpu operations,
         # nvtx will be removed if enforce_eager is False.
         enforce_eager=True,  # turn off torch graph compile.
-        gpu_memory_utilization=0.95,  # Set high GPU memory utilization to maximize performance. Adjust if OOM occurs.
+        gpu_memory_utilization=0.80,  # Set high GPU memory utilization to maximize performance. Adjust if OOM occurs.
         max_num_batched_tokens=(
-            4096
+            32768
         ),  # Increase the max number of batched tokens in single "step()" to simplify the scheduling. OOM may happen if it is too large.
     )
 

@@ -1,5 +1,6 @@
 """Utility functions for benchmarks."""
 
+from random import randint
 from typing import Any, Dict, List
 
 from benchmarks.config import BenchmarkConfig
@@ -11,7 +12,7 @@ import torch
 
 def build_prompt(config: BenchmarkConfig) -> List[str]:
     """Build a prompt of the specified length."""
-    prompt_token_ids = [123] * config.prompt_length
+    prompt_token_ids = [randint(0, 4000) for _ in range(config.prompt_length)]
 
     # Convert token IDs to tokens and join them into a string
     tokenizer = AutoTokenizer.from_pretrained(config.model_name)

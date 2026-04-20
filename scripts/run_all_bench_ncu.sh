@@ -8,13 +8,13 @@ LOG_DIR="${PROJECT_ROOT}/ncu-logs"
 
 timestamp="$(date +"%Y%m%d_%H%M%S")"
 
-BATCH_SIZES=(1)
-PROMPT_LENGTHS=(4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536 131072)
+BATCH_SIZES=(1 2 4 8 16 32 64)
+PROMPT_LENGTHS=(65536)
 WARMUP_ITERATIONS=2
 
-NCU_SETS="${NCU_SETS:-full}"
+NCU_SETS="${NCU_SETS:-roofline}"
 read -r -a NCU_SETS <<< "${NCU_SETS}"
-NCU_REPLAY_MODE="${NCU_REPLAY_MODE:-app-range}"
+NCU_REPLAY_MODE="${NCU_REPLAY_MODE:-kernel}"
 NCU_RANGE_FILTER="${NCU_RANGE_FILTER:-}"
 
 BENCHMARK_PROFILE_TARGET_LAYER_IDS="${BENCHMARK_PROFILE_TARGET_LAYER_IDS:-16,17,18}"
@@ -74,9 +74,10 @@ for batch_size in "${BATCH_SIZES[@]}"; do
 			ncu
 			-o "${report_prefix}"
 			-f
-			# --profile-from-start off # profile the range between cudaProfilerStart() and cudaProfilerStop() calls in the code
+			--profile-from-start off # profile the range between cudaProfilerStart() and cudaProfilerStop() calls in the code
 			--replay-mode "${NCU_REPLAY_MODE}"
 			--nvtx
+			--kernel-name regex:"gemm_bf16|Kernel2|flash_fwd_splitkv_kernel" # focus on the kernels that takes the most time
 		)
 
 
@@ -108,7 +109,7 @@ for batch_size in "${BATCH_SIZES[@]}"; do
 	done
 done
 
-echo
+echo "Benchmark sweep completed: ${CURRENT_RUN}/${TOTAL_RUNS} runs attempted."
 echo "Sweep completed."
 
 if ((${#FAILED_RUNS[@]} > 0)); then
